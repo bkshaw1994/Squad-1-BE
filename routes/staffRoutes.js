@@ -224,6 +224,7 @@ router.route('/').get(protect, getStaffs).post(protect, createStaff);
  *         description: Staff not found
  *   put:
  *     summary: Update staff member
+ *     description: Update staff member details. If shift is changed, all future attendance records will be automatically updated with the new shift.
  *     tags: [Staff]
  *     security:
  *       - bearerAuth: []

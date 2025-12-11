@@ -228,16 +228,35 @@ const createStaff = async (req, res) => {
 // @route   PUT /api/staff/:id
 const updateStaff = async (req, res) => {
   try {
-    const staff = await Staff.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!staff) {
+    const oldStaff = await Staff.findById(req.params.id);
+    if (!oldStaff) {
       return res.status(404).json({ 
         success: false, 
         error: 'Staff not found' 
       });
     }
+
+    const staff = await Staff.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    // If shift is being updated, update all future attendance records
+    if (req.body.shift && req.body.shift !== oldStaff.shift) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      await Attendance.updateMany(
+        {
+          staffId: staff._id,
+          date: { $gte: today }
+        },
+        {
+          shift: req.body.shift
+        }
+      );
+    }
+
     res.json({ 
       success: true, 
       data: staff 
