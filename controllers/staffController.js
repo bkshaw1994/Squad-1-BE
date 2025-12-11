@@ -31,29 +31,37 @@ const checkShiftRequirements = (staffByShift) => {
       technicianCount >= requirements['Technician'];
 
     const shortages = [];
+    const missingStaff = {};
+    
     if (doctorCount < requirements['Doctor']) {
+      const needed = requirements['Doctor'] - doctorCount;
       shortages.push({
         role: 'Doctor',
         required: requirements['Doctor'],
         current: doctorCount,
-        needed: requirements['Doctor'] - doctorCount,
+        needed: needed,
       });
+      missingStaff['Doctor'] = needed;
     }
     if (nurseCount < requirements['Nurse']) {
+      const needed = requirements['Nurse'] - nurseCount;
       shortages.push({
         role: 'Nurse',
         required: requirements['Nurse'],
         current: nurseCount,
-        needed: requirements['Nurse'] - nurseCount,
+        needed: needed,
       });
+      missingStaff['Nurse'] = needed;
     }
     if (technicianCount < requirements['Technician']) {
+      const needed = requirements['Technician'] - technicianCount;
       shortages.push({
         role: 'Technician',
         required: requirements['Technician'],
         current: technicianCount,
-        needed: requirements['Technician'] - technicianCount,
+        needed: needed,
       });
+      missingStaff['Technician'] = needed;
     }
 
     shiftStatus[shift] = {
@@ -70,6 +78,7 @@ const checkShiftRequirements = (staffByShift) => {
         Technician: requirements['Technician'],
       },
       shortages: shortages.length > 0 ? shortages : null,
+      missingStaff: Object.keys(missingStaff).length > 0 ? missingStaff : null,
       message: isFullyStaffed ? 'Fully staffed' : 'Short staffed',
     };
   }

@@ -55,10 +55,12 @@ const { protect } = require('../middleware/auth');
  *                   count: 4
  *                   staffing:
  *                     Morning:
- *                       required: { Doctor: 1, Nurse: 2, Technician: 1 }
- *                       current: { Doctor: 1, Nurse: 2, Technician: 1 }
  *                       isFullyStaffed: true
- *                       shortages: []
+ *                       staffCount: { Doctor: 1, Nurse: 2, Technician: 1 }
+ *                       requirements: { Doctor: 1, Nurse: 2, Technician: 1 }
+ *                       shortages: null
+ *                       missingStaff: null
+ *                       message: "Fully staffed"
  *                   data:
  *                     - name: "Dr. Smith"
  *                       staffId: "D001"
@@ -71,6 +73,36 @@ const { protect } = require('../middleware/auth');
  *                       role: "Nurse"
  *                       shift: "Morning"
  *                       attendanceStatus: "Not Marked"
+ *               shortStaffed:
+ *                 summary: Short staffed shift with missing staff count
+ *                 value:
+ *                   success: true
+ *                   count: 2
+ *                   staffing:
+ *                     Evening:
+ *                       isFullyStaffed: false
+ *                       staffCount: { Doctor: 0, Nurse: 1, Technician: 1 }
+ *                       requirements: { Doctor: 1, Nurse: 2, Technician: 1 }
+ *                       shortages:
+ *                         - role: "Doctor"
+ *                           required: 1
+ *                           current: 0
+ *                           needed: 1
+ *                         - role: "Nurse"
+ *                           required: 2
+ *                           current: 1
+ *                           needed: 1
+ *                       missingStaff: { Doctor: 1, Nurse: 1 }
+ *                       message: "Short staffed"
+ *                   data:
+ *                     - name: "Nurse Johnson"
+ *                       staffId: "N003"
+ *                       role: "Nurse"
+ *                       shift: "Evening"
+ *                     - name: "Tech Wilson"
+ *                       staffId: "T002"
+ *                       role: "Technician"
+ *                       shift: "Evening"
  *               withoutDate:
  *                 summary: Without date parameter - no attendance data
  *                 value:
@@ -78,9 +110,12 @@ const { protect } = require('../middleware/auth');
  *                   count: 4
  *                   staffing:
  *                     Morning:
- *                       required: { Doctor: 1, Nurse: 2, Technician: 1 }
- *                       current: { Doctor: 1, Nurse: 2, Technician: 1 }
  *                       isFullyStaffed: true
+ *                       staffCount: { Doctor: 1, Nurse: 2, Technician: 1 }
+ *                       requirements: { Doctor: 1, Nurse: 2, Technician: 1 }
+ *                       shortages: null
+ *                       missingStaff: null
+ *                       message: "Fully staffed"
  *                   data:
  *                     - name: "Dr. Smith"
  *                       staffId: "D001"
