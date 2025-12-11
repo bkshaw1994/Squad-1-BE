@@ -1,0 +1,207 @@
+const Staff = require('../models/Staff');
+
+// Helper function to check shift requirements
+const checkShiftRequirements = (staffByShift) => {
+  const requirements = {
+    'Doctor': 1,
+    'Nurse': 2,
+    'Technician': 1,
+  };
+
+  const shiftStatus = {};
+
+  for (const [shift, staffList] of Object.entries(staffByShift)) {
+    const roleCounts = {};
+    
+    // Count staff by role for this shift
+    staffList.forEach(staff => {
+      const role = staff.role;
+      roleCounts[role] = (roleCounts[role] || 0) + 1;
+    });
+
+    // Check requirements
+    const doctorCount = roleCounts['Doctor'] || 0;
+    const nurseCount = roleCounts['Nurse'] || 0;
+    const technicianCount = roleCounts['Technician'] || roleCounts['Lab Technician'] || 0;
+
+    const isFullyStaffed = 
+      doctorCount >= requirements['Doctor'] &&
+      nurseCount >= requirements['Nurse'] &&
+      technicianCount >= requirements['Technician'];
+
+    const shortages = [];
+    if (doctorCount < requirements['Doctor']) {
+      shortages.push({
+        role: 'Doctor',
+        required: requirements['Doctor'],
+        current: doctorCount,
+        needed: requirements['Doctor'] - doctorCount,
+      });
+    }
+    if (nurseCount < requirements['Nurse']) {
+      shortages.push({
+        role: 'Nurse',
+        required: requirements['Nurse'],
+        current: nurseCount,
+        needed: requirements['Nurse'] - nurseCount,
+      });
+    }
+    if (technicianCount < requirements['Technician']) {
+      shortages.push({
+        role: 'Technician',
+        required: requirements['Technician'],
+        current: technicianCount,
+        needed: requirements['Technician'] - technicianCount,
+      });
+    }
+
+    shiftStatus[shift] = {
+      isFullyStaffed,
+      staff: staffList,
+      staffCount: {
+        Doctor: doctorCount,
+        Nurse: nurseCount,
+        Technician: technicianCount,
+      },
+      requirements: {
+        Doctor: requirements['Doctor'],
+        Nurse: requirements['Nurse'],
+        Technician: requirements['Technician'],
+      },
+      shortages: shortages.length > 0 ? shortages : null,
+      message: isFullyStaffed ? 'Fully staffed' : 'Short staffed',
+    };
+  }
+
+  return shiftStatus;
+};
+
+// @desc    Get all staff with shift requirements check
+// @route   GET /api/staff
+const getStaffs = async (req, res) => {
+  try {
+    const staff = await Staff.find().select('name staffId role shift');
+    
+    // Group staff by shift
+    const staffByShift = {};
+    staff.forEach(member => {
+      const shift = member.shift;
+      if (!staffByShift[shift]) {
+        staffByShift[shift] = [];
+      }
+      staffByShift[shift].push(member);
+    });
+
+    // Check requirements for each shift
+    const shiftStatus = checkShiftRequirements(staffByShift);
+
+    res.json({ 
+      success: true, 
+      count: staff.length,
+      data: staff,
+      shiftStatus,
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+};
+
+// @desc    Get single staff member
+// @route   GET /api/staff/:id
+const getStaff = async (req, res) => {
+  try {
+    const staff = await Staff.findById(req.params.id);
+    if (!staff) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Staff not found' 
+      });
+    }
+    res.json({ 
+      success: true, 
+      data: staff 
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+};
+
+// @desc    Create new staff member
+// @route   POST /api/staff
+const createStaff = async (req, res) => {
+  try {
+    const staff = await Staff.create(req.body);
+    res.status(201).json({ 
+      success: true, 
+      data: staff 
+    });
+  } catch (error) {
+    res.status(400).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+};
+
+// @desc    Update staff member
+// @route   PUT /api/staff/:id
+const updateStaff = async (req, res) => {
+  try {
+    const staff = await Staff.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!staff) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Staff not found' 
+      });
+    }
+    res.json({ 
+      success: true, 
+      data: staff 
+    });
+  } catch (error) {
+    res.status(400).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+};
+
+// @desc    Delete staff member
+// @route   DELETE /api/staff/:id
+const deleteStaff = async (req, res) => {
+  try {
+    const staff = await Staff.findByIdAndDelete(req.params.id);
+    if (!staff) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Staff not found' 
+      });
+    }
+    res.json({ 
+      success: true, 
+      data: {} 
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+};
+
+module.exports = {
+  getStaffs,
+  getStaff,
+  createStaff,
+  updateStaff,
+  deleteStaff,
+};

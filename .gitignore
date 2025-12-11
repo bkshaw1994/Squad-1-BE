@@ -1,0 +1,15 @@
+node_modules/
+.env
+.DS_Store
+npm-debug.log
+*.log
+.vscode/
+dist/
+build/
+
+# Exclude commands file from git
+COMMANDS.md
+
+# Test coverage
+coverage/
+.nyc_output/
