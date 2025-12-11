@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 require('dotenv').config();
 const connectDB = require('./config/database');
 
@@ -16,12 +18,21 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to the API' });
+  res.json({ 
+    message: 'Welcome to the Health Staff Scheduler & Attendance Tracker API',
+    documentation: '/api-docs'
+  });
 });
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });
 });
+
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Health Staff Scheduler API',
+}));
 
 // API Routes
 app.use('/api/auth', require('./routes/authRoutes'));

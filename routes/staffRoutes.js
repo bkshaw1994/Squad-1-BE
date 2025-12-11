@@ -9,9 +9,103 @@ const {
 } = require('../controllers/staffController');
 const { protect } = require('../middleware/auth');
 
-// Protect all staff routes with authentication
+/**
+ * @swagger
+ * /api/staff:
+ *   get:
+ *     summary: Get all staff with shift requirements check
+ *     tags: [Staff]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: shift
+ *         schema:
+ *           type: string
+ *         description: Filter by shift (Morning, Evening, Night)
+ *     responses:
+ *       200:
+ *         description: List of staff with shift status
+ *       401:
+ *         description: Not authorized
+ *   post:
+ *     summary: Create new staff member
+ *     tags: [Staff]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Staff'
+ *     responses:
+ *       201:
+ *         description: Staff created successfully
+ *       400:
+ *         description: Validation error
+ */
 router.route('/').get(protect, getStaffs).post(protect, createStaff);
 
+/**
+ * @swagger
+ * /api/staff/{id}:
+ *   get:
+ *     summary: Get staff by ID
+ *     tags: [Staff]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Staff ID
+ *     responses:
+ *       200:
+ *         description: Staff details
+ *       404:
+ *         description: Staff not found
+ *   put:
+ *     summary: Update staff member
+ *     tags: [Staff]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Staff'
+ *     responses:
+ *       200:
+ *         description: Staff updated successfully
+ *       404:
+ *         description: Staff not found
+ *   delete:
+ *     summary: Delete staff member
+ *     tags: [Staff]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Staff deleted successfully
+ *       404:
+ *         description: Staff not found
+ */
 router.route('/:id').get(protect, getStaff).put(protect, updateStaff).delete(protect, deleteStaff);
 
 module.exports = router;
