@@ -22,6 +22,11 @@ app.use(cors({
     // allow REST tools like Postman
     if (!origin) return callback(null, true);
 
+    // For development, allow any localhost
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      return callback(null, true);
+    }
+
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
