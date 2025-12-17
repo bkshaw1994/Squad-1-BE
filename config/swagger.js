@@ -10,8 +10,8 @@ const getServers = () => {
       description: 'Development server',
     });
     
-    // Add production server if BACKEND_URL is set and different from localhost
-    const backendUrl = process.env.BACKEND_URL;
+    // Add production server from environment or hardcoded
+    const backendUrl = process.env.BACKEND_URL || 'https://my-mern-backend-ajeeasdqc6fphwgh.southindia-01.azurewebsites.net';
     if (backendUrl && !backendUrl.includes('localhost')) {
       servers.push({
         url: backendUrl,
@@ -19,13 +19,11 @@ const getServers = () => {
       });
     }
     
-    // Always have at least localhost as fallback
-    if (servers.length === 1) {
-      servers.push({
-        url: 'http://localhost:3001',
-        description: 'Alternative development server',
-      });
-    }
+    // Always have alternative dev server
+    servers.push({
+      url: 'http://localhost:3001',
+      description: 'Alternative development server',
+    });
     
     return servers;
   } catch (error) {
@@ -34,6 +32,10 @@ const getServers = () => {
       {
         url: 'http://localhost:3000',
         description: 'Development server',
+      },
+      {
+        url: 'https://my-mern-backend-ajeeasdqc6fphwgh.southindia-01.azurewebsites.net',
+        description: 'Production server',
       },
     ];
   }
