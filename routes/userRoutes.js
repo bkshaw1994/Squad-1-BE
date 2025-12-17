@@ -49,7 +49,7 @@ const { protect } = require('../middleware/auth');
  *             $ref: '#/components/schemas/User'
  *     responses:
  *       201:
- *         description: User created successfully
+ *         description: User created successfully with JWT token
  *         content:
  *           application/json:
  *             example:
@@ -59,6 +59,7 @@ const { protect } = require('../middleware/auth');
  *                 name: "New User"
  *                 userName: "newuser"
  *                 email: "newuser@example.com"
+ *                 token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  *       400:
  *         description: Validation error
  *         content:

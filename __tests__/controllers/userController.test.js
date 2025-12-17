@@ -90,7 +90,7 @@ describe('User Controller Tests', () => {
   });
 
   describe('POST /api/users', () => {
-    it('should create new user', async () => {
+    it('should create new user and return JWT token', async () => {
       const newUser = {
         name: 'New User',
         userName: 'newuser',
@@ -106,6 +106,8 @@ describe('User Controller Tests', () => {
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
       expect(response.body.data.userName).toBe('newuser');
+      expect(response.body.data.token).toBeDefined();
+      expect(typeof response.body.data.token).toBe('string');
     });
 
     it('should fail without required fields', async () => {
