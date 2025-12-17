@@ -34,23 +34,38 @@ app.use(cors({
     // allow REST tools like Postman
     if (!origin) return callback(null, true);
 
-    // For development, allow any localhost
-    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-      console.log(`CORS allowed (localhost): ${origin}`);
-      return callback(null, true);
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    // For development, allow localhost
+    if (!isProduction) {
+      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        console.log(`CORS allowed (dev localhost): ${origin}`);
+        return callback(null, true);
+      }
     }
 
-    // For production, allow Azure Static Web Apps and any azurestaticapps.net domain
-    if (origin.includes('azurestaticapps.net')) {
-      console.log(`CORS allowed (Azure): ${origin}`);
-      return callback(null, true);
+    // For production, only allow Azure Static Web Apps and whitelisted origins
+    if (isProduction) {
+      if (origin.includes('azurestaticapps.net')) {
+        console.log(`CORS allowed (production Azure): ${origin}`);
+        return callback(null, true);
+      }
+      
+      if (allowedOrigins.includes(origin)) {
+        console.log(`CORS allowed (production whitelist): ${origin}`);
+        return callback(null, true);
+      }
+
+      console.warn(`CORS blocked in production: ${origin}`);
+      return callback(new Error("CORS not allowed in production"));
     }
 
+    // Development: also check whitelist
     if (allowedOrigins.includes(origin)) {
-      console.log(`CORS allowed (whitelist): ${origin}`);
+      console.log(`CORS allowed (dev whitelist): ${origin}`);
       callback(null, true);
     } else {
-      console.warn(`CORS blocked origin: ${origin}`);
+      console.warn(`CORS blocked (development): ${origin}`);
       callback(new Error("CORS not allowed"));
     }
   },
