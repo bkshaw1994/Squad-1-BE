@@ -31,42 +31,55 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
+    console.log(`[CORS] Incoming origin: ${origin}`);
+    console.log(`[CORS] NODE_ENV: ${process.env.NODE_ENV}`);
+    
     // allow REST tools like Postman
-    if (!origin) return callback(null, true);
+    if (!origin) {
+      console.log('[CORS] No origin (Postman/curl) - allowed');
+      return callback(null, true);
+    }
 
     const isProduction = process.env.NODE_ENV === 'production';
 
     // For development, allow localhost
     if (!isProduction) {
       if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-        console.log(`CORS allowed (dev localhost): ${origin}`);
-        return callback(null, true);
-      }
-    }
-
-    // For production, only allow Azure Static Web Apps and whitelisted origins
-    if (isProduction) {
-      if (origin.includes('azurestaticapps.net')) {
-        console.log(`CORS allowed (production Azure): ${origin}`);
+        console.log(`[CORS] Allowed (dev localhost): ${origin}`);
         return callback(null, true);
       }
       
+      // Development: check whitelist
       if (allowedOrigins.includes(origin)) {
-        console.log(`CORS allowed (production whitelist): ${origin}`);
+        console.log(`[CORS] Allowed (dev whitelist): ${origin}`);
         return callback(null, true);
       }
-
-      console.warn(`CORS blocked in production: ${origin}`);
-      return callback(new Error("CORS not allowed in production"));
+      
+      console.log(`[CORS] Rejected (dev): ${origin}`);
+      return callback(new Error("CORS not allowed"));
     }
 
-    // Development: also check whitelist
-    if (allowedOrigins.includes(origin)) {
-      console.log(`CORS allowed (dev whitelist): ${origin}`);
-      callback(null, true);
-    } else {
-      console.warn(`CORS blocked (development): ${origin}`);
-      callback(new Error("CORS not allowed"));
+    // Production mode - be more permissive to debug
+    if (isProduction) {
+      // Always allow Azure Static Web Apps
+      if (origin.includes('azurestaticapps.net')) {
+        console.log(`[CORS] Allowed (Azure): ${origin}`);
+        return callback(null, true);
+      }
+      
+      // Also check whitelist
+      if (allowedOrigins.includes(origin)) {
+        console.log(`[CORS] Allowed (whitelist): ${origin}`);
+        return callback(null, true);
+      }
+      
+      // For now, log and continue (temporary debugging)
+      console.warn(`[CORS] WARNING - origin not recognized: ${origin}`);
+      console.warn(`[CORS] Allowed origins: ${allowedOrigins.join(', ')}`);
+      
+      // Temporarily allow to diagnose - REMOVE AFTER DEBUGGING
+      console.warn('[CORS] Allowing anyway for debugging purposes');
+      return callback(null, true);
     }
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
