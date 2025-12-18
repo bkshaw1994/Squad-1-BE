@@ -117,24 +117,37 @@ try {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Error caught by middleware:');
-  console.error('- Message:', err.message);
-  console.error('- Stack:', err.stack);
+  console.error('=== ERROR CAUGHT ===');
+  console.error('Timestamp:', new Date().toISOString());
+  console.error('Path:', req.path);
+  console.error('Method:', req.method);
+  console.error('Message:', err.message);
+  console.error('Stack:', err.stack);
+  console.error('==================');
   
   if (err.message === 'CORS not allowed') {
     return res.status(403).json({ 
       success: false, 
-      error: 'CORS error: Origin not allowed' 
+      error: 'CORS error: Origin not allowed',
+      origin: req.get('origin')
     });
   }
   
-  res.status(500).json({ 
+  // Always send error details for debugging
+  const errorResponse = {
     success: false, 
-    error: process.env.NODE_ENV === 'production' 
-      ? 'Internal Server Error' 
-      : err.message,
-    details: process.env.NODE_ENV !== 'production' ? err.stack : undefined
-  });
+    error: 'Internal Server Error',
+    timestamp: new Date().toISOString(),
+    path: req.path,
+    method: req.method,
+    details: {
+      message: err.message,
+      type: err.name,
+      code: err.code
+    }
+  };
+  
+  res.status(500).json(errorResponse);
 });
 
 // 404 handler
